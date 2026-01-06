@@ -1,1 +1,1 @@
-A Python implementation of a backward raytracing algorithm, which can be used to generate weak gravitatinal lensing maps. This version of the resummation model is described in van Broxterman et al. (2023): https://ui.adsabs.harvard.edu/abs/2024MNRAS.529.2309B/abstract
+A Python implementation of a backward raytracing algorithm, which can be used to generate weak gravitatinal lensing maps. This version of the resummation model is described in van Broxterman et al. (2024): https://ui.adsabs.harvard.edu/abs/2024MNRAS.529.2309B/abstract
