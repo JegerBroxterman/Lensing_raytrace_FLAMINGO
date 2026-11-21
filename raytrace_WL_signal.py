@@ -449,6 +449,7 @@ for i_shell in tqdm(range(NR_shells - 1)):
         )
     )
 
+    deflec_field[1, :] = deflec_field[1, :] / np.sin(beta_rays[0, :, 1])  
     beta_rays[:, :, 2] = (
         (1 - factor) * beta_rays[:, :, 0]
         + factor * beta_rays[:, :, 1]
