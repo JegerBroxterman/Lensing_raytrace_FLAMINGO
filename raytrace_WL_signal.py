@@ -112,7 +112,7 @@ def downgrade(old_map,nside_new):
 def rotate_map(hmap, rot_theta, rot_phi):
     longitude = rot_phi*180/np.pi * u.deg
     latitude = rot_theta*180/np.pi * u.deg
-    if longitude.value != 0. and latitude.value != 0.:
+    if longitude.value != 0. or latitude.value != 0.:
         rot_custom = hp.Rotator(rot=[longitude.to_value(u.deg), latitude.to_value(u.deg)], inv=True)
         hmap = rot_custom.rotate_map_alms(hmap)
     return hmap	 
@@ -349,12 +349,11 @@ for i_shell in tqdm(range(NR_shells - 1)):
         )
 
     else:  # for the other planes we use bilinear interpolation or NGP to estimate the deflection field and shear matrix
-        ray_coords = beta_rays[:, :, 1]
-        ray_coords = ray_coords + 2 * np.pi
-        ray_coords[1, :] = ray_coords[1, :] % (2 * np.pi)  # phi
-        ray_coords[0, :] = ray_coords[0, :] % (
-            np.pi
-        )  # to make sure all in right range for healpix functions
+        ray_coords = beta_rays[:, :, 1].copy()
+        crossed_pole = (ray_coords[0, :] < 0) | (ray_coords[0, :] > np.pi)  
+        ray_coords[0, :] = np.arccos(np.cos(ray_coords[0, :])) 
+        ray_coords[1, crossed_pole] = ray_coords[1, crossed_pole] + np.pi 
+        ray_coords[1, :] = ray_coords[1, :] % (2 * np.pi)  # to make sure all in right range for healpix functions
 
         if not NGP:  # Bilinear interpolation
             neighbours, weights = hp.pixelfunc.get_interp_weights(
@@ -450,6 +449,7 @@ for i_shell in tqdm(range(NR_shells - 1)):
     )
 
     deflec_field[1, :] = deflec_field[1, :] / np.sin(beta_rays[0, :, 1])  
+    deflec_field = deflec_field * np.sign(np.sin(beta_rays[0, :, 1]))  # theta and phi directions are flipped for rays past a pole
     beta_rays[:, :, 2] = (
         (1 - factor) * beta_rays[:, :, 0]
         + factor * beta_rays[:, :, 1]
